@@ -170,10 +170,10 @@ func strptime_tz(
 			// Check for prefix text. It must be an exact match, e.g. with input "foo 2021" and
 			// format "foo %Y", "foo " == "foo ". Or, if the format starts with a "%", we're
 			// checking "" == "".
-			if strptimeInput[inputIdx:inputIdx+len(partBetweenPercentSigns)] != partBetweenPercentSigns {
+			if !strings.HasPrefix(strptimeInput[inputIdx:], partBetweenPercentSigns) {
 				if _debug {
 					fmt.Printf("\"%s\" != \"%s\"\n",
-						strptimeInput[inputIdx:inputIdx+len(partBetweenPercentSigns)], partBetweenPercentSigns,
+						strptimeInput[inputIdx:], partBetweenPercentSigns,
 					)
 				}
 				return time.Time{}, ErrFormatMismatch
@@ -188,7 +188,7 @@ func strptime_tz(
 			if _debug {
 				fmt.Printf("formatCode        '%c'\n", '%')
 			}
-			if strptimeInput[inputIdx:inputIdx+1] != "%" {
+			if inputIdx >= len(strptimeInput) || strptimeInput[inputIdx] != '%' {
 				if _debug {
 					fmt.Println("did not match %%")
 				}
@@ -315,6 +315,10 @@ func strptime_tz(
 					// Allow single-digit at end of string (e.g. "1989-1-2" for %Y-%m-%d); we zero-pad when building.
 					sil = min(want, remaining)
 				}
+			}
+
+			if sil+interveningLen > len(strptimeInput)-inputIdx {
+				return time.Time{}, ErrFormatMismatch
 			}
 
 			// Use the format's literal as separator after each value (e.g. "/" for %m/%d/%Y) so Go parses unambiguously.
