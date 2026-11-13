@@ -1,0 +1,1 @@
+mlr put '$a = is_error(strptime("x", "prefix %Y")); $b = is_error(strptime("1970-01-01", "%F%%")); $c = is_error(strptime(" ", "%c")); $d = is_error(strptime("4", "%e %Y"))' ${CASEDIR}/input
